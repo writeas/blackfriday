@@ -22,7 +22,7 @@ import (
 var (
 	urlRe    = `((https?|ftp):\/\/|\/)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+`
 	anchorRe = regexp.MustCompile(`^(<a\shref="` + urlRe + `"(\stitle="[^"<>]+")?\s?>` + urlRe + `<\/a>)`)
-	hashRe   = regexp.MustCompile(`#([\p{L}\p{M}][\p{L}\p{M}\d]*)`)
+	hashRe   = regexp.MustCompile(`#(([\d]+[\p{L}\p{M}]+[\p{L}\p{M}\d]*)|([\p{L}\p{M}][\p{L}\p{M}\d]*))`)
 )
 
 // Functions to parse text within a block
