@@ -18,6 +18,7 @@ package blackfriday
 import (
 	"bytes"
 	"fmt"
+	"github.com/embedas/go-embed/providers"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,6 +45,7 @@ const (
 	HTML_SMARTYPANTS_ANGLED_QUOTES             // enable angled double quotes (with HTML_USE_SMARTYPANTS) for double quotes rendering
 	HTML_FOOTNOTE_RETURN_LINKS                 // generate a link at the end of a footnote to return to the source
 	HTML_HASHTAGS                              // enable WriteFreely hashtag extraction
+	HTML_RICH_CONTENT                          // enable URL extraction beside auto-linking for rich media embeds
 )
 
 var (
@@ -439,6 +441,13 @@ func (options *Html) AutoLink(out *bytes.Buffer, link []byte, kind int) {
 		out.WriteString("<tt>")
 		entityEscapeWithSkip(out, link, skipRanges)
 		out.WriteString("</tt>")
+		return
+	}
+
+	if options.flags&HTML_RICH_CONTENT != 0 && providers.EmbedURL(string(link)) {
+		out.WriteString("{embed: ")
+		entityEscapeWithSkip(out, link, skipRanges)
+		out.WriteString(" }")
 		return
 	}
 

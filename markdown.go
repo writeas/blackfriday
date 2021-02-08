@@ -34,6 +34,7 @@ const (
 	EXTENSION_TABLES                                 // render tables
 	EXTENSION_FENCED_CODE                            // render fenced code blocks
 	EXTENSION_AUTOLINK                               // detect embedded URLs that are not explicitly marked
+	EXTENSION_RICH_CONTENT                           // detect URLs for embedding rich content
 	EXTENSION_STRIKETHROUGH                          // strikethrough text using ~~test~~
 	EXTENSION_LAX_HTML_BLOCKS                        // loosen up HTML block parsing rules
 	EXTENSION_SPACE_HEADERS                          // be strict about prefix header rules
@@ -372,7 +373,7 @@ func MarkdownOptions(input []byte, renderer Renderer, opts Options) []byte {
 	p.inlineCallback['\\'] = escape
 	p.inlineCallback['&'] = entity
 
-	if extensions&EXTENSION_AUTOLINK != 0 {
+	if extensions&EXTENSION_AUTOLINK != 0 || extensions&EXTENSION_RICH_CONTENT != 0 {
 		p.inlineCallback[':'] = autoLink
 	}
 
