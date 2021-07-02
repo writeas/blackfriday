@@ -1,4 +1,2 @@
 github.com/embedas/go-embed v1.0.0 h1:cu3fQFT0q6l9YqZQy/pD0XHIa6T33E1U31OMx6XSm34=
 github.com/embedas/go-embed v1.0.0/go.mod h1:vI9OozfD8cJOtxkhW4mklPqsW5TVeZLg5+8zkCAKvdk=
-github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
-github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
