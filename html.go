@@ -33,6 +33,7 @@ const (
 	HTML_SAFELINK                              // only link to trusted protocols
 	HTML_NOFOLLOW_LINKS                        // only link with rel="nofollow"
 	HTML_NOREFERRER_LINKS                      // only link with rel="noreferrer"
+	HTML_NOOPENER_LINKS                        // only link with rel="noopener"
 	HTML_HREF_TARGET_BLANK                     // add a blank target
 	HTML_TOC                                   // generate a table of contents
 	HTML_OMIT_CONTENTS                         // skip the main contents (for a standalone table of contents)
@@ -43,6 +44,7 @@ const (
 	HTML_SMARTYPANTS_DASHES                    // enable smart dashes (with HTML_USE_SMARTYPANTS)
 	HTML_SMARTYPANTS_LATEX_DASHES              // enable LaTeX-style dashes (with HTML_USE_SMARTYPANTS and HTML_SMARTYPANTS_DASHES)
 	HTML_SMARTYPANTS_ANGLED_QUOTES             // enable angled double quotes (with HTML_USE_SMARTYPANTS) for double quotes rendering
+	HTML_SMARTYPANTS_QUOTES_NBSP               // enable "French guillemets" (with HTML_USE_SMARTYPANTS)
 	HTML_FOOTNOTE_RETURN_LINKS                 // generate a link at the end of a footnote to return to the source
 	HTML_HASHTAGS                              // enable WriteFreely hashtag extraction
 	HTML_RICH_CONTENT                          // enable URL extraction beside auto-linking for rich media embeds
@@ -257,33 +259,21 @@ func (options *Html) HRule(out *bytes.Buffer) {
 	out.WriteByte('\n')
 }
 
-func (options *Html) BlockCode(out *bytes.Buffer, text []byte, lang string) {
+func (options *Html) BlockCode(out *bytes.Buffer, text []byte, info string) {
 	doubleSpace(out)
 
-	// parse out the language names/classes
-	count := 0
-	for _, elt := range strings.Fields(lang) {
-		if elt[0] == '.' {
-			elt = elt[1:]
-		}
-		if len(elt) == 0 {
-			continue
-		}
-		if count == 0 {
-			out.WriteString("<pre><code class=\"language-")
-		} else {
-			out.WriteByte(' ')
-		}
-		attrEscape(out, []byte(elt))
-		count++
+	endOfLang := strings.IndexAny(info, "\t ")
+	if endOfLang < 0 {
+		endOfLang = len(info)
 	}
-
-	if count == 0 {
+	lang := info[:endOfLang]
+	if len(lang) == 0 || lang == "." {
 		out.WriteString("<pre><code>")
 	} else {
+		out.WriteString("<pre><code class=\"language-")
+		attrEscape(out, []byte(lang))
 		out.WriteString("\">")
 	}
-
 	attrEscape(out, text)
 	out.WriteString("</code></pre>\n")
 }
@@ -467,6 +457,9 @@ func (options *Html) AutoLink(out *bytes.Buffer, link []byte, kind int) {
 	if options.flags&HTML_NOREFERRER_LINKS != 0 && !isRelativeLink(link) {
 		relAttrs = append(relAttrs, "noreferrer")
 	}
+	if options.flags&HTML_NOOPENER_LINKS != 0 && !isRelativeLink(link) {
+		relAttrs = append(relAttrs, "noopener")
+	}
 	if len(relAttrs) > 0 {
 		out.WriteString(fmt.Sprintf("\" rel=\"%s", strings.Join(relAttrs, " ")))
 	}
@@ -581,6 +574,9 @@ func (options *Html) Link(out *bytes.Buffer, link []byte, title []byte, content 
 	if options.flags&HTML_NOREFERRER_LINKS != 0 && !isRelativeLink(link) {
 		relAttrs = append(relAttrs, "noreferrer")
 	}
+	if options.flags&HTML_NOOPENER_LINKS != 0 && !isRelativeLink(link) {
+		relAttrs = append(relAttrs, "noopener")
+	}
 	if len(relAttrs) > 0 {
 		out.WriteString(fmt.Sprintf("\" rel=\"%s", strings.Join(relAttrs, " ")))
 	}
@@ -630,7 +626,7 @@ func (options *Html) FootnoteRef(out *bytes.Buffer, ref []byte, id int) {
 	out.WriteString(`fnref:`)
 	out.WriteString(options.parameters.FootnoteAnchorPrefix)
 	out.Write(slug)
-	out.WriteString(`"><a rel="footnote" href="#`)
+	out.WriteString(`"><a href="#`)
 	out.WriteString(`fn:`)
 	out.WriteString(options.parameters.FootnoteAnchorPrefix)
 	out.Write(slug)
